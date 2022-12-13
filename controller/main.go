@@ -17,6 +17,7 @@ limitations under the License.
 package main
 
 import (
+	"errors"
 	"flag"
 	"os"
 
@@ -50,11 +51,17 @@ func main() {
 	var metricsAddr string
 	var enableLeaderElection bool
 	var probeAddr string
+	var api7CloudToken string
+	var api7CloudAddr string
+
 	flag.StringVar(&metricsAddr, "metrics-bind-address", ":8080", "The address the metric endpoint binds to.")
 	flag.StringVar(&probeAddr, "health-probe-bind-address", ":8081", "The address the probe endpoint binds to.")
 	flag.BoolVar(&enableLeaderElection, "leader-elect", false,
 		"Enable leader election for controller manager. "+
 			"Enabling this will ensure there is only one active controller manager.")
+	flag.StringVar(&api7CloudToken, "api7-cloud-token", "", "The API7 Cloud access token.")
+	flag.StringVar(&api7CloudAddr, "api7-cloud-addr", "https://api.api7.cloud", "The API7 Cloud address.")
+
 	opts := zap.Options{
 		Development: true,
 	}
@@ -62,6 +69,11 @@ func main() {
 	flag.Parse()
 
 	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts)))
+
+	if api7CloudToken == "" {
+		setupLog.Error(errors.New("empty token"), "invalid -api7-cloud-token option")
+		os.Exit(1)
+	}
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme:                 scheme,
@@ -88,6 +100,8 @@ func main() {
 	}
 
 	if err = (&controllers.ServiceReconciler{
+		Token:  api7CloudToken,
+		Addr:   api7CloudAddr,
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="485f5c28-64df-4a41-93b5-fe0ee7f30056" name="intel-nuc11">
+        <fileTransfer rootFolder="/home/alex" accessType="SFTP" host="intel-nuc11" port="22" sshConfigId="c0e03ee5-2204-4127-8a88-344fbedb48d3" sshConfig="alex@intel-nuc11:22 password">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>
