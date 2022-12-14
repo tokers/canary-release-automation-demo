@@ -69,11 +69,6 @@ spec:
               - name: http
                 protocol: TCP
                 containerPort: 8081
-            args:
-              - -api7-cloud-addr
-              - https://api.test.api7.cloud
-              - -api7-cloud-token
-              - "your token"
 ---
 apiVersion: v1
 kind: Service

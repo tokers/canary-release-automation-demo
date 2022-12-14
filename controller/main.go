@@ -21,13 +21,12 @@ import (
 	"flag"
 	"os"
 
-	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
-	// to ensure that exec-entrypoint and run can make use of them.
-	_ "k8s.io/client-go/plugin/pkg/client/auth"
-
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
+	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
+	// to ensure that exec-entrypoint and run can make use of them.
+	_ "k8s.io/client-go/plugin/pkg/client/auth"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
@@ -70,9 +69,17 @@ func main() {
 
 	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts)))
 
-	if api7CloudToken == "" {
-		setupLog.Error(errors.New("empty token"), "invalid -api7-cloud-token option")
-		os.Exit(1)
+	{
+		api7CloudToken = os.Getenv("API7_CLOUD_TOKEN")
+		if api7CloudToken == "" {
+			setupLog.Error(errors.New("empty token"), "invalid env API7_CLOUD_TOKEN")
+			os.Exit(1)
+		}
+
+		api7CloudAddr = os.Getenv("API7_CLOUD_ADDR")
+		if api7CloudAddr == "" {
+			api7CloudAddr = "https://api.api7.cloud"
+		}
 	}
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
