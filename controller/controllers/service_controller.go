@@ -126,7 +126,7 @@ func (r *ServiceReconciler) reconcile(ctx context.Context, svc *corev1.Service) 
 		}
 
 		if err := r.createOrUpdateCanaryRelease(ctx, app, svc, percentage); err != nil {
-			return ctrl.Result{Requeue: true}, nil
+			return ctrl.Result{Requeue: true}, err
 		}
 	} else {
 		if err := r.pauseAllCanaryReleaseRules(ctx, app); err != nil {
@@ -187,7 +187,6 @@ func (r *ServiceReconciler) findOrCreateApplication(ctx context.Context, svc *co
 	}
 
 	// Application was not created yet.
-	host := fmt.Sprintf("%s.%s", svc.Name, svc.Namespace)
 	pathPrefix := "/"
 
 	upstreamVersion := fmt.Sprintf("%s/%s", svc.Namespace, svc.Name)
@@ -199,7 +198,7 @@ func (r *ServiceReconciler) findOrCreateApplication(ctx context.Context, svc *co
 			Labels:      []string{"canary-release-controller"},
 			Protocols:   []string{cloud.ProtocolHTTP},
 			PathPrefix:  pathPrefix,
-			Hosts:       []string{host},
+			Hosts:       []string{appName},
 			Upstreams: []cloud.UpstreamAndVersion{
 				{
 					Upstream: cloud.Upstream{
@@ -278,7 +277,7 @@ func (r *ServiceReconciler) pauseAllCanaryReleaseRules(ctx context.Context, app 
 		}
 
 		if rule.State == cloud.CanaryReleaseStateInProgress {
-			_, err := r.sdk.PauseCanaryRelease(ctx, rule.ID, &cloud.ResourceUpdateOptions{
+			_, err := r.sdk.PauseCanaryRelease(ctx, rule, &cloud.ResourceUpdateOptions{
 				Application: &cloud.Application{
 					ID: app.ID,
 				},
@@ -315,7 +314,7 @@ func (r *ServiceReconciler) createOrUpdateCanaryRelease(ctx context.Context, app
 		if rule.Name == ruleName {
 			rule.Percent = percentage
 			if rule.Percent == 100 {
-				_, err = r.sdk.FinishCanaryRelease(ctx, rule.ID, &cloud.ResourceUpdateOptions{
+				_, err = r.sdk.FinishCanaryRelease(ctx, rule, &cloud.ResourceUpdateOptions{
 					Application: &cloud.Application{
 						ID: app.ID,
 					},
@@ -341,20 +340,24 @@ func (r *ServiceReconciler) createOrUpdateCanaryRelease(ctx context.Context, app
 	// Canary release doesn't exist.
 	upstreamVersion := fmt.Sprintf("%s/%s", svc.Namespace, svc.Name)
 
-	app.Upstreams = append(app.Upstreams, cloud.UpstreamAndVersion{
-		Upstream: cloud.Upstream{
-			Scheme: cloud.UpstreamSchemeHTTP,
-			LBType: cloud.LoadBalanceRoundRobin,
-			Targets: []cloud.UpstreamTarget{
-				{
-					Host:   fmt.Sprintf("%s.%s", svc.Name, svc.Namespace),
-					Port:   int(svc.Spec.Ports[0].Port),
-					Weight: 100,
+	app.Upstreams = []cloud.UpstreamAndVersion{
+		app.Upstreams[0],
+		{
+			Upstream: cloud.Upstream{
+				Scheme: cloud.UpstreamSchemeHTTP,
+				LBType: cloud.LoadBalanceRoundRobin,
+				Targets: []cloud.UpstreamTarget{
+					{
+						Host:   fmt.Sprintf("%s.%s", svc.Name, svc.Namespace),
+						Port:   int(svc.Spec.Ports[0].Port),
+						Weight: 100,
+					},
 				},
 			},
+			Version: upstreamVersion,
 		},
-		Version: upstreamVersion,
-	})
+	}
+
 	_, err = r.sdk.UpdateApplication(ctx, app, &cloud.ResourceUpdateOptions{
 		ControlPlane: &cloud.ControlPlane{
 			ID: r.controlPlane.ID,
@@ -383,7 +386,7 @@ func (r *ServiceReconciler) createOrUpdateCanaryRelease(ctx context.Context, app
 	}
 
 	if percentage == 100 {
-		_, err = r.sdk.FinishCanaryRelease(ctx, rule.ID, &cloud.ResourceUpdateOptions{
+		_, err = r.sdk.FinishCanaryRelease(ctx, rule, &cloud.ResourceUpdateOptions{
 			Application: &cloud.Application{
 				ID: app.ID,
 			},
@@ -392,7 +395,7 @@ func (r *ServiceReconciler) createOrUpdateCanaryRelease(ctx context.Context, app
 			return errors.Wrap(err, "failed to finish canary release rule")
 		}
 	} else {
-		_, err = r.sdk.StartCanaryRelease(ctx, rule.ID, &cloud.ResourceUpdateOptions{
+		_, err = r.sdk.StartCanaryRelease(ctx, rule, &cloud.ResourceUpdateOptions{
 			Application: &cloud.Application{
 				ID: app.ID,
 			},

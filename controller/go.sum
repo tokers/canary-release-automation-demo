@@ -81,6 +81,10 @@ github.com/api7/cloud-go-sdk v0.0.0-20221208034935-bf73362be4e4 h1:Uc3AQM827v8dW
 github.com/api7/cloud-go-sdk v0.0.0-20221208034935-bf73362be4e4/go.mod h1:/9US6noPq1xIGhHxhVAhoFnqvHzudLhjT1oCo9GzsUg=
 github.com/api7/cloud-go-sdk v0.0.0-20221208054236-968acac8231b h1:/0cByh/edhuu8+/yzBQsZXFO5layMjw5Gblfos//8DU=
 github.com/api7/cloud-go-sdk v0.0.0-20221208054236-968acac8231b/go.mod h1:/9US6noPq1xIGhHxhVAhoFnqvHzudLhjT1oCo9GzsUg=
+github.com/api7/cloud-go-sdk v0.0.0-20221215084321-447f1127d4e4 h1:t/qa/cpGTYM8TwO1yHnaASiDJTnhmivttY+Kj9bmQ10=
+github.com/api7/cloud-go-sdk v0.0.0-20221215084321-447f1127d4e4/go.mod h1:/9US6noPq1xIGhHxhVAhoFnqvHzudLhjT1oCo9GzsUg=
+github.com/api7/cloud-go-sdk v0.0.0-20221215090215-8fce1f4233a5 h1:r2TI1Dse9hIjYbRsV/3KIoSsMV7Sj2iWqsL4QawUCT0=
+github.com/api7/cloud-go-sdk v0.0.0-20221215090215-8fce1f4233a5/go.mod h1:/9US6noPq1xIGhHxhVAhoFnqvHzudLhjT1oCo9GzsUg=
 github.com/benbjohnson/clock v1.1.0 h1:Q92kusRqC1XV2MjkWETPvjJVqKetz1OzxZB7mHJLju8=
 github.com/benbjohnson/clock v1.1.0/go.mod h1:J11/hYXuz8f4ySSvYwY0FKfm+ezbsZBKZxNJlLklBHA=
 github.com/beorn7/perks v0.0.0-20180321164747-3a771d992973/go.mod h1:Dwedo/Wpr24TaqPxmxbtue+5NUziq4I4S80YR8gNf3Q=
